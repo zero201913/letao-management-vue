@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单数据生成工具</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            surface: {
+              0: '#ffffff',
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            },
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .scrollbar-thin {
+        scrollbar-width: thin;
+      }
+      .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+      }
+    }
+  </style>
+</head>
+<body class="bg-surface-50 min-h-screen">
+  <!-- 页面头部 -->
+  <div class="bg-white border-b border-surface-200">
+    <div class="container mx-auto px-4 py-4">
+      <div>
+        <h1 class="text-2xl font-bold text-surface-800">订单数据生成工具</h1>
+        <p class="text-surface-500 mt-1">批量生成符合业务规则的订单数据</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <div class="container mx-auto px-4 py-6">
+    <!-- 操作区 -->
+    <div class="bg-white rounded-lg shadow-sm border border-surface-200 p-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">生成订单数量</label>
+          <input
+            type="number"
+            id="orderCount"
+            min="1"
+            max="1000"
+            value="100"
+            class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">起始日期</label>
+          <input
+            type="date"
+            id="startDate"
+            class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">结束日期</label>
+          <input
+            type="date"
+            id="endDate"
+            class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+      </div>
+      <div class="mt-4 flex gap-4">
+        <button
+          id="generateBtn"
+          class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
+        >
+          <i class="fa fa-refresh"></i>
+          生成订单数据
+        </button>
+        <button
+          id="exportBtn"
+          class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+          disabled
+        >
+          <i class="fa fa-download"></i>
+          导出 JSON
+        </button>
+        <button
+          id="clearBtn"
+          class="px-6 py-2 bg-surface-200 text-surface-700 rounded-lg hover:bg-surface-300 transition-colors flex items-center gap-2"
+        >
+          <i class="fa fa-trash"></i>
+          清空数据
+        </button>
+      </div>
+    </div>
+
+    <!-- 筛选区 -->
+    <div class="bg-white rounded-lg shadow-sm border border-surface-200 p-4 mb-6">
+      <h2 class="text-lg font-semibold text-surface-800 mb-4">数据筛选</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- 日期范围筛选 -->
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">日期范围</label>
+          <div class="flex flex-col gap-2">
+            <input
+              type="date"
+              id="filterStartDate"
+              class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+            <input
+              type="date"
+              id="filterEndDate"
+              class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
+        </div>
+
+        <!-- 订单ID筛选 -->
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">订单ID</label>
+          <input
+            type="number"
+            id="filterOrderId"
+            placeholder="请输入订单ID"
+            class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          />
+        </div>
+
+        <!-- 支付金额区间筛选 -->
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">支付金额区间</label>
+          <div class="flex flex-col gap-2">
+            <input
+              type="number"
+              id="filterMinAmount"
+              placeholder="最小金额"
+              class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+            <input
+              type="number"
+              id="filterMaxAmount"
+              placeholder="最大金额"
+              class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
+        </div>
+
+        <!-- 每页显示数量 -->
+        <div>
+          <label class="block text-sm font-medium text-surface-700 mb-1">每页显示</label>
+          <select
+            id="pageSize"
+            class="w-full px-4 py-2 rounded-lg border border-surface-300 text-surface-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="10">10条/页</option>
+            <option value="20">20条/页</option>
+            <option value="50">50条/页</option>
+            <option value="100">100条/页</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button
+          id="filterBtn"
+          class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
+        >
+          <i class="fa fa-search"></i>
+          筛选
+        </button>
+        <button
+          id="resetFilterBtn"
+          class="px-4 py-2 bg-surface-200 text-surface-700 rounded-lg hover:bg-surface-300 transition-colors flex items-center gap-2"
+        >
+          <i class="fa fa-refresh"></i>
+          重置
+        </button>
+      </div>
+    </div>
+
+    <!-- 数据展示区 -->
+    <div class="bg-white rounded-lg shadow-sm border border-surface-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-surface-50 border-b border-surface-200">
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">订单ID</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">订单编号</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">用户ID</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">商家ID</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">订单金额</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">支付金额</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">订单状态</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">支付方式</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">支付时间</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-surface-700">创建时间</th>
+            </tr>
+          </thead>
+          <tbody id="orderTableBody">
+            <tr>
+              <td colspan="10" class="px-4 py-10 text-center text-surface-500">
+                <i class="fa fa-info-circle text-2xl mb-2"></i>
+                <p>请点击生成按钮创建订单数据</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 分页控件 -->
+      <div id="pagination" class="px-4 py-3 border-t border-surface-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4 hidden">
+        <div class="text-sm text-surface-500">
+          显示 <span id="startItem">1</span> 到 <span id="endItem">10</span> 条，共 <span id="totalItems">0</span> 条
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            id="prevPage"
+            class="px-3 py-1 rounded border border-surface-300 bg-surface-0 text-surface-800 text-sm hover:bg-surface-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            disabled
+          >
+            上一页
+          </button>
+          <div id="pageNumbers" class="flex items-center gap-1">
+            <!-- 页码会动态生成 -->
+          </div>
+          <button
+            id="nextPage"
+            class="px-3 py-1 rounded border border-surface-300 bg-surface-0 text-surface-800 text-sm hover:bg-surface-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            disabled
+          >
+            下一页
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局变量
+    let orders = [];
+    let filteredOrders = [];
+    let currentPage = 1;
+    let pageSize = 10;
+    let goodsData = [];
+
+    // 订单状态选项
+    const orderStatuses = [
+      { value: 1, label: '待付款' },
+      { value: 2, label: '待发货' },
+      { value: 3, label: '待收货' },
+      { value: 4, label: '已完成' },
+      { value: 5, label: '已取消' },
+      { value: 6, label: '退款中' },
+      { value: 7, label: '已退款' }
+    ];
+
+    // 支付方式选项
+    const paymentMethods = [
+      { value: 1, label: '微信支付' },
+      { value: 2, label: '支付宝' },
+      { value: 3, label: '银行卡' },
+      { value: 4, label: '货到付款' },
+      { value: 5, label: '余额支付' }
+    ];
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置默认日期
+      const today = new Date().toISOString().split('T')[0];
+      const lastMonth = new Date();
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      const lastMonthStr = lastMonth.toISOString().split('T')[0];
+
+      document.getElementById('startDate').value = lastMonthStr;
+      document.getElementById('endDate').value = today;
+      document.getElementById('filterStartDate').value = lastMonthStr;
+      document.getElementById('filterEndDate').value = today;
+
+      // 加载商品数据
+      loadGoodsData();
+
+      // 绑定事件
+      document.getElementById('generateBtn').addEventListener('click', generateOrders);
+      document.getElementById('exportBtn').addEventListener('click', exportOrders);
+      document.getElementById('clearBtn').addEventListener('click', clearOrders);
+      document.getElementById('filterBtn').addEventListener('click', applyFilter);
+      document.getElementById('resetFilterBtn').addEventListener('click', resetFilter);
+      document.getElementById('pageSize').addEventListener('change', function() {
+        pageSize = parseInt(this.value);
+        currentPage = 1;
+        renderOrders();
+      });
+    });
+
+    // 加载商品数据
+    function loadGoodsData() {
+      // 从 goods.js 中提取的真实商品数据
+      goodsData = [
+        {
+          id: 1,
+          name: "【京东包邮】手机支架爆款可爱小新公仔桌面摆件懒人支架塑料手办礼物追剧手机支架 卡通小新支架-红色小新1个",
+          price: 3.0,
+          shop: "京喜自营官方店",
+          shopId: 1
+        },
+        {
+          id: 2,
+          name: "圣诞节礼物小黑猫包包挂件",
+          price: 15.0,
+          shop: "Murcia京东自营旗舰店",
+          shopId: 2
+        },
+        {
+          id: 3,
+          name: "拉迪图小狗潮玩盲盒可爱摆件生日",
+          price: 17.0,
+          shop: "拉迪图玩具旗舰店",
+          shopId: 3
+        },
+        {
+          id: 4,
+          name: "一二布布摆件",
+          price: 17.0,
+          shop: "京喜自营官方店",
+          shopId: 1
+        },
+        {
+          id: 5,
+          name: "3.0搪胶随机款盲盒",
+          price: 25.0,
+          shop: "天天小爆小店",
+          shopId: 4
+        },
+        {
+          id: 6,
+          name: "奶龙摆件盲盒【全套6款】",
+          price: 42.0,
+          shop: "京喜自营官方店",
+          shopId: 1
+        },
+        {
+          id: 7,
+          name: "语森忆疯狂动物城肓盒朱迪尼克羊副市长毛绒玩偶祖国版潮玩公仔挂饰礼物",
+          price: 58.0,
+          shop: "柏名智能玩具专营店",
+          shopId: 5
+        },
+        {
+          id: 8,
+          name: "潮玩搞怪可爱手办摆件派大星15cm",
+          price: 60.0,
+          shop: "大发潮玩经营部",
+          shopId: 6
+        },
+        {
+          id: 9,
+          name: "柏治廷史迪奇永生花潮玩手办盲盒",
+          price: 79.0,
+          shop: "京东鲜花自营专区",
+          shopId: 7
+        },
+        {
+          id: 10,
+          name: "语森忆Q版小流萤手办【S+高配版】星穹铁道",
+          price: 86.0,
+          shop: "柏名智能玩具专营店",
+          shopId: 5
+        },
+        {
+          id: 11,
+          name: "蜡笔小新手办",
+          price: 102.0,
+          shop: "千牛教育玩具专营店",
+          shopId: 8
+        },
+        {
+          id: 12,
+          name: "语森忆疯狂动物城肓盒朱迪尼克羊副市长毛绒玩偶",
+          price: 106.0,
+          shop: "柏名智能玩具专营店",
+          shopId: 5
+        },
+        {
+          id: 13,
+          name: "布鲁可传奇版假面骑士空我",
+          price: 144.0,
+          shop: "布鲁可潮玩京东自营旗舰店",
+          shopId: 9
+        },
+        {
+          id: 14,
+          name: "马力全开-盲盒随机款式",
+          price: 188.0,
+          shop: "世界树WTREE潮玩买手店",
+          shopId: 10
+        },
+        {
+          id: 15,
+          name: "索尼（SONY）PS5 原装游戏手柄",
+          price: 290.0,
+          shop: "潮玩二手数码配件专营店",
+          shopId: 11
+        },
+        {
+          id: 16,
+          name: "琢匠关羽大玩家金属人仔关公文玩铜摆件",
+          price: 338.0,
+          shop: "琢匠官方旗舰店",
+          shopId: 12
+        },
+        {
+          id: 17,
+          name: "木系没无AI电子宠物",
+          price: 469.0,
+          shop: "芙崽（Fuzozo）京东自营旗舰店",
+          shopId: 13
+        },
+        {
+          id: 18,
+          name: "Jellycat巴塞罗熊动物毛绒偶",
+          price: 499.0,
+          shop: "JELLYCAT官方旗舰店",
+          shopId: 14
+        },
+        {
+          id: 19,
+          name: "POP MART泡泡玛特 HIRONO公路日志系列-毛绒公仔挂件",
+          price: 129.0,
+          shop: "泡泡玛特官方旗舰店",
+          shopId: 15
+        },
+        {
+          id: 20,
+          name: "POP MART泡泡玛特 DIMOO新生日记系列-搪胶毛绒挂件",
+          price: 99.0,
+          shop: "泡泡玛特官方旗舰店",
+          shopId: 15
+        }
+      ];
+    }
+
+    // 生成订单数据
+    function generateOrders() {
+      const count = parseInt(document.getElementById('orderCount').value);
+      const startDate = new Date(document.getElementById('startDate').value);
+      const endDate = new Date(document.getElementById('endDate').value);
+
+      if (startDate > endDate) {
+        alert('起始日期不能晚于结束日期');
+        return;
+      }
+
+      if (goodsData.length === 0) {
+        alert('请先加载商品数据');
+        return;
+      }
+
+      // 清空现有数据
+      orders = [];
+
+      // 生成订单
+      for (let i = 1; i <= count; i++) {
+        const orderDate = getRandomDate(startDate, endDate);
+        const orderStatus = getRandomOrderStatus();
+        const paymentMethod = getRandomPaymentMethod();
+        const product = getRandomProduct();
+
+        // 计算订单金额
+        const quantity = Math.floor(Math.random() * 5) + 1; // 1-5件
+        const orderAmount = product.price * quantity;
+        const paymentAmount = orderAmount * (Math.random() * 0.1 + 0.9); // 90%-100%的订单金额
+
+        // 生成订单编号
+        const orderNo = generateOrderNo(orderDate);
+
+        // 生成时间字段
+        const createdAt = orderDate;
+        const updatedAt = new Date(createdAt);
+        updatedAt.setMinutes(updatedAt.getMinutes() + Math.floor(Math.random() * 30));
+
+        let paidTime = null;
+        if ([2, 3, 4, 6, 7].includes(orderStatus)) {
+          paidTime = new Date(createdAt);
+          paidTime.setMinutes(paidTime.getMinutes() + Math.floor(Math.random() * 15));
+        }
+
+        // 创建订单对象
+        const order = {
+          order_id: i,
+          order_no: orderNo,
+          user_id: Math.floor(Math.random() * 1000) + 1, // 1-1000的随机用户ID
+          merchant_id: product.shopId,
+          order_amount: parseFloat(orderAmount.toFixed(2)),
+          payment_amount: parseFloat(paymentAmount.toFixed(2)),
+          order_status: orderStatus,
+          payment_method: paymentMethod,
+          paid_time: paidTime ? paidTime.toISOString() : null,
+          shipping_no: [3, 4].includes(orderStatus) ? generateShippingNo() : null,
+          is_deleted: 0,
+          created_at: createdAt.toISOString(),
+          updated_at: updatedAt.toISOString()
+        };
+
+        orders.push(order);
+      }
+
+      // 按创建时间排序
+      orders.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      // 重新编号
+      orders.forEach((order, index) => {
+        order.order_id = index + 1;
+      });
+
+      // 启用导出按钮
+      document.getElementById('exportBtn').disabled = false;
+
+      // 应用筛选
+      applyFilter();
+    }
+
+    // 生成订单编号
+    function generateOrderNo(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      return `ORD${year}${month}${day}${random}`;
+    }
+
+    // 生成物流单号
+    function generateShippingNo() {
+      const carriers = ['SF', 'YT', 'YD', 'ZT', 'ST'];
+      const carrier = carriers[Math.floor(Math.random() * carriers.length)];
+      const number = Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+      return `${carrier}${number}`;
+    }
+
+    // 获取随机日期
+    function getRandomDate(start, end) {
+      const startTime = start.getTime();
+      const endTime = end.getTime();
+      const randomTime = startTime + Math.random() * (endTime - startTime);
+      return new Date(randomTime);
+    }
+
+    // 获取随机订单状态
+    function getRandomOrderStatus() {
+      // 按概率分布
+      const statuses = [1, 2, 3, 4, 5, 6, 7];
+      const weights = [20, 20, 20, 30, 5, 3, 2]; // 权重
+
+      let totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+      let random = Math.random() * totalWeight;
+
+      for (let i = 0; i < statuses.length; i++) {
+        random -= weights[i];
+        if (random <= 0) {
+          return statuses[i];
+        }
+      }
+
+      return 1;
+    }
+
+    // 获取随机支付方式
+    function getRandomPaymentMethod() {
+      return paymentMethods[Math.floor(Math.random() * paymentMethods.length)].value;
+    }
+
+    // 获取随机商品
+    function getRandomProduct() {
+      return goodsData[Math.floor(Math.random() * goodsData.length)];
+    }
+
+    // 应用筛选
+    function applyFilter() {
+      const filterStartDate = document.getElementById('filterStartDate').value;
+      const filterEndDate = document.getElementById('filterEndDate').value;
+      const filterOrderId = document.getElementById('filterOrderId').value;
+      const filterMinAmount = document.getElementById('filterMinAmount').value;
+      const filterMaxAmount = document.getElementById('filterMaxAmount').value;
+
+      filteredOrders = orders.filter(order => {
+        // 日期范围筛选
+        const orderDate = new Date(order.created_at);
+        const start = filterStartDate ? new Date(filterStartDate) : null;
+        const end = filterEndDate ? new Date(filterEndDate) : null;
+
+        if (start && orderDate < start) return false;
+        if (end && orderDate > end) return false;
+
+        // 订单ID筛选
+        if (filterOrderId && order.order_id !== parseInt(filterOrderId)) return false;
+
+        // 支付金额区间筛选
+        if (filterMinAmount && order.payment_amount < parseFloat(filterMinAmount)) return false;
+        if (filterMaxAmount && order.payment_amount > parseFloat(filterMaxAmount)) return false;
+
+        return true;
+      });
+
+      // 重置分页
+      currentPage = 1;
+      renderOrders();
+    }
+
+    // 重置筛选
+    function resetFilter() {
+      document.getElementById('filterStartDate').value = document.getElementById('startDate').value;
+      document.getElementById('filterEndDate').value = document.getElementById('endDate').value;
+      document.getElementById('filterOrderId').value = '';
+      document.getElementById('filterMinAmount').value = '';
+      document.getElementById('filterMaxAmount').value = '';
+      applyFilter();
+    }
+
+    // 渲染订单
+    function renderOrders() {
+      const tableBody = document.getElementById('orderTableBody');
+      const pagination = document.getElementById('pagination');
+      const startItemEl = document.getElementById('startItem');
+      const endItemEl = document.getElementById('endItem');
+      const totalItemsEl = document.getElementById('totalItems');
+      const pageNumbersEl = document.getElementById('pageNumbers');
+      const prevPageBtn = document.getElementById('prevPage');
+      const nextPageBtn = document.getElementById('nextPage');
+
+      if (filteredOrders.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="10" class="px-4 py-10 text-center text-surface-500">
+              <i class="fa fa-search text-2xl mb-2"></i>
+              <p>暂无符合条件的订单数据</p>
+            </td>
+          </tr>
+        `;
+        pagination.classList.add('hidden');
+        return;
+      }
+
+      // 计算分页
+      const totalPages = Math.ceil(filteredOrders.length / pageSize);
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, filteredOrders.length);
+      const pageOrders = filteredOrders.slice(startIndex, endIndex);
+
+      // 渲染表格
+      let html = '';
+      pageOrders.forEach(order => {
+        const statusLabel = orderStatuses.find(s => s.value === order.order_status)?.label || '未知';
+        const paymentLabel = paymentMethods.find(p => p.value === order.payment_method)?.label || '未知';
+
+        html += `
+          <tr class="border-b border-surface-200 hover:bg-surface-50 transition-all">
+            <td class="px-4 py-3 text-sm text-surface-800">${order.order_id}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">${order.order_no}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">${order.user_id}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">${order.merchant_id}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">¥${order.order_amount.toFixed(2)}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">¥${order.payment_amount.toFixed(2)}</td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrderStatusClass(order.order_status)}">
+                ${statusLabel}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-surface-800">${paymentLabel}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">${order.paid_time ? formatDate(order.paid_time) : '-'}</td>
+            <td class="px-4 py-3 text-sm text-surface-800">${formatDate(order.created_at)}</td>
+          </tr>
+        `;
+      });
+      tableBody.innerHTML = html;
+
+      // 渲染分页
+      startItemEl.textContent = startIndex + 1;
+      endItemEl.textContent = endIndex;
+      totalItemsEl.textContent = filteredOrders.length;
+
+      // 渲染页码
+      pageNumbersEl.innerHTML = '';
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `px-3 py-1 rounded border ${i === currentPage ? 'bg-primary-500 text-white border-primary-500' : 'bg-surface-0 text-surface-800 border-surface-300 hover:bg-surface-100'} text-sm transition-all`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener('click', function() {
+          currentPage = i;
+          renderOrders();
+        });
+        pageNumbersEl.appendChild(pageBtn);
+      }
+
+      // 更新分页按钮状态
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages;
+
+      // 绑定分页按钮事件
+      prevPageBtn.onclick = function() {
+        if (currentPage > 1) {
+          currentPage--;
+          renderOrders();
+        }
+      };
+
+      nextPageBtn.onclick = function() {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderOrders();
+        }
+      };
+
+      // 显示分页控件
+      pagination.classList.remove('hidden');
+    }
+
+    // 获取订单状态样式
+    function getOrderStatusClass(status) {
+      switch(status) {
+        case 1: return 'bg-yellow-100 text-yellow-800';
+        case 2: return 'bg-blue-100 text-blue-800';
+        case 3: return 'bg-purple-100 text-purple-800';
+        case 4: return 'bg-green-100 text-green-800';
+        case 5: return 'bg-gray-100 text-gray-800';
+        case 6: return 'bg-orange-100 text-orange-800';
+        case 7: return 'bg-red-100 text-red-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    // 导出订单数据
+    function exportOrders() {
+      if (orders.length === 0) {
+        alert('暂无订单数据可导出');
+        return;
+      }
+
+      const dataStr = JSON.stringify(orders, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `orders-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // 清空订单数据
+    function clearOrders() {
+      orders = [];
+      filteredOrders = [];
+      currentPage = 1;
+
+      const tableBody = document.getElementById('orderTableBody');
+      const pagination = document.getElementById('pagination');
+
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="10" class="px-4 py-10 text-center text-surface-500">
+            <i class="fa fa-info-circle text-2xl mb-2"></i>
+            <p>请点击生成按钮创建订单数据</p>
+          </td>
+        </tr>
+      `;
+
+      pagination.classList.add('hidden');
+      document.getElementById('exportBtn').disabled = true;
+    }
+  </script>
+</body>
+</html>

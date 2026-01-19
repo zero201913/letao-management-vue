@@ -1,9 +1,19 @@
 <script setup>
 import Layout from './components/Layout/Layout.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// 定义不需要Layout的路由路径
+const noLayoutRoutes = ['/']
 </script>
 
 <template>
-  <Layout />
+  <!-- 根据路由路径决定是否显示Layout -->
+  <template v-if="noLayoutRoutes.includes(route.path)">
+    <router-view />
+  </template>
+  <Layout v-else />
 </template>
 
 <style>

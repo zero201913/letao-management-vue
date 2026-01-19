@@ -81,7 +81,6 @@ import { computed } from 'vue'
 import BaseCard from '../components/UI/BaseCard.vue'
 import BaseLineChart from '../components/UI/BaseLineChart.vue'
 import BasePieChart from '../components/UI/BasePieChart.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { salesTrendData, productCategoryData } from '../data/statistics'
 import { 
   faDollarSign, 

@@ -1,158 +1,255 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <h2 class="text-2xl font-bold text-surface-800 dark:text-white">产品管理</h2>
-      <BaseButton variant="primary" @click="handleAddProduct">
-        <i class="fas fa-plus mr-2"></i>
-        添加产品
-      </BaseButton>
+  <div class="bg-surface-0 dark:bg-surface-900 min-h-screen">
+    <!-- 页面头部 -->
+    <div class="border-b border-surface-200 dark:border-surface-800">
+      <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-surface-800 dark:text-white">产品管理</h1>
+          <p class="text-surface-500 dark:text-surface-400 mt-1">管理系统产品信息</p>
+        </div>
+        <BaseButton variant="primary" @click="handleAddProduct">
+          <i class="fas fa-plus"></i>
+          添加产品
+        </BaseButton>
+      </div>
     </div>
 
-    <BaseCard :padding="false">
-      <div class="p-4 border-b border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row gap-4">
-        <div class="relative flex-1">
-          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-surface-400"></i>
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="搜索产品..."
-            class="input pl-10"
-          />
-        </div>
-        <div class="flex gap-2">
-          <select v-model="categoryFilter" class="input w-auto">
-            <option value="">全部分类</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-          </select>
-          <select v-model="statusFilter" class="input w-auto">
-            <option value="">全部状态</option>
-            <option value="active">在售</option>
-            <option value="inactive">下架</option>
-          </select>
-        </div>
-      </div>
+    <!-- 主内容区 -->
+    <div class="container mx-auto px-4 py-6">
+      <!-- 筛选条件 -->
+      <div class="bg-white dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <!-- 产品名称搜索 -->
+          <div class="md:col-span-3">
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">产品名称</label>
+            <div class="relative">
+              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-surface-400"></i>
+              <input
+                type="text"
+                v-model="searchQuery"
+                placeholder="请输入产品名称"
+                class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                @input="handleSearch"
+              />
+            </div>
+          </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-surface-50 dark:bg-surface-800">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">产品名称</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">分类</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">价格</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">库存</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">状态</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">创建时间</th>
-              <th class="px-6 py-3 text-left text-xs font-semibold text-surface-600 dark:text-surface-400 uppercase tracking-wider">操作</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-surface-100 dark:divide-surface-800">
-            <tr
-              v-for="product in filteredProducts"
-              :key="product.id"
-              class="hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors"
+          <!-- 产品类型筛选 -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">产品类型</label>
+            <select
+              v-model="categoryFilter"
+              @change="handleSearch"
+              class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
             >
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{{ product.id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-surface-100 dark:bg-surface-700 flex items-center justify-center">
-                    <i class="fas fa-box text-surface-400"></i>
-                  </div>
-                  <span class="text-sm font-medium text-surface-800 dark:text-white">{{ product.name }}</span>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <BaseTag variant="info">{{ product.category }}</BaseTag>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-surface-800 dark:text-white">{{ product.price }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-surface-600 dark:text-surface-300">{{ product.stock }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <BaseTag :variant="product.status === 'active' ? 'success' : 'warning'">
-                  {{ product.status === 'active' ? '在售' : '下架' }}
-                </BaseTag>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-surface-500">{{ product.createTime }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-2">
-                  <BaseButton variant="ghost" size="sm" @click="handleViewProduct(product)">
-                    <i class="fas fa-eye"></i>
-                  </BaseButton>
-                  <BaseButton variant="ghost" size="sm" @click="handleEditProduct(product)">
-                    <i class="fas fa-edit"></i>
-                  </BaseButton>
-                  <BaseButton variant="ghost" size="sm" @click="handleDeleteProduct(product)">
-                    <i class="fas fa-trash text-danger-500"></i>
-                  </BaseButton>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              <option value="">全部分类</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+          </div>
 
-      <div class="p-4 border-t border-surface-200 dark:border-surface-700 flex items-center justify-between">
-        <p class="text-sm text-surface-500">
-          显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, total) }} 条，共 {{ total }} 条
-        </p>
-        <div class="flex gap-2">
-          <BaseButton
-            variant="secondary"
-            size="sm"
-            :disabled="currentPage === 1"
-            @click="currentPage--"
-          >
-            <i class="fas fa-chevron-left mr-1"></i>
-            上一页
-          </BaseButton>
-          <BaseButton
-            variant="secondary"
-            size="sm"
-            :disabled="currentPage === totalPages"
-            @click="currentPage++"
-          >
-            下一页
-            <i class="fas fa-chevron-right ml-1"></i>
-          </BaseButton>
+          <!-- 价格区间筛选 -->
+          <div class="md:col-span-4">
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">价格区间</label>
+            <div class="flex items-center gap-3">
+              <input
+                type="number"
+                v-model="priceRange.min"
+                placeholder="最低价"
+                class="flex-1 px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                @input="handleSearch"
+              />
+              <span class="text-surface-500 text-sm whitespace-nowrap">-</span>
+              <input
+                type="number"
+                v-model="priceRange.max"
+                placeholder="最高价"
+                class="flex-1 px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                @input="handleSearch"
+              />
+            </div>
+          </div>
+
+          <!-- 每页显示数量 -->
+          <div class="md:col-span-3">
+            <label class="block text-sm font-medium text-surface-500 dark:text-surface-300 mb-1">每页显示</label>
+            <select
+              v-model="pageSize"
+              @change="handlePageSizeChange"
+              class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            >
+              <option value="10">10条/页</option>
+              <option value="20">20条/页</option>
+              <option value="50">50条/页</option>
+            </select>
+          </div>
         </div>
       </div>
-    </BaseCard>
+
+      <!-- 表格区域 -->
+      <div class="bg-white dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full table-layout-fixed">
+            <thead>
+              <tr class="bg-surface-50 dark:bg-surface-800/50 border-b border-surface-200 dark:border-surface-700">
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[60px]">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[40%]">产品名称</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[80px]">类型</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[100px]">折扣价</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[100px]">原价</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[20%]">店铺</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-surface-700 dark:text-surface-300 w-[120px]">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="product in paginatedProducts"
+                :key="product.id"
+                class="border-b border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-all"
+              >
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ product.id }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <img :src="product.thumbnail" :alt="product.name" class="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                    <span class="text-sm font-medium text-surface-800 dark:text-white truncate max-w-[calc(100%-40px)]">{{ product.name }}</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {{ product.type }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm font-medium text-surface-800 dark:text-white">¥{{ product.discountedPrice || product.originalPrice }}</td>
+                <td class="px-4 py-3 text-sm text-surface-600 dark:text-surface-300 line-through">¥{{ product.originalPrice || '-' }}</td>
+                <td class="px-4 py-3 text-sm text-surface-600 dark:text-surface-300 truncate">{{ product.shop }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <button
+                      @click="handleViewProduct(product)"
+                      class="w-8 h-8 flex items-center justify-center rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
+                    >
+                      <i class="fas fa-eye text-sm"></i>
+                    </button>
+                    <button
+                      @click="handleEditProduct(product)"
+                      class="w-8 h-8 flex items-center justify-center rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
+                    >
+                      <i class="fas fa-edit text-sm"></i>
+                    </button>
+                    <button
+                      @click="handleDeleteProduct(product)"
+                      class="w-8 h-8 flex items-center justify-center rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-danger-500 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
+                    >
+                      <i class="fas fa-trash text-sm"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 加载状态 -->
+        <div v-if="loading" class="py-10 flex justify-center items-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
+        </div>
+
+        <!-- 空状态 -->
+        <div v-else-if="paginatedProducts.length === 0" class="py-10 flex flex-col justify-center items-center">
+          <i class="fas fa-box text-4xl text-surface-300 dark:text-surface-600 mb-2"></i>
+          <p class="text-surface-500 dark:text-surface-400">暂无产品数据</p>
+        </div>
+
+        <!-- 分页控件 -->
+        <div v-else class="px-4 py-3 border-t border-surface-200 dark:border-surface-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="text-sm text-surface-500 dark:text-surface-400">
+            显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, filteredProducts.length) }} 条，共 {{ filteredProducts.length }} 条
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1">
+              <button
+                @click="currentPage = 1"
+                :disabled="currentPage === 1"
+                class="px-3 py-1 rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white text-sm hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                首页
+              </button>
+              <button
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+                class="px-3 py-1 rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white text-sm hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                上一页
+              </button>
+              <span class="px-3 py-1 text-sm text-surface-800 dark:text-white bg-surface-100 dark:bg-surface-800 rounded border border-surface-300 dark:border-surface-600">
+                {{ currentPage }}
+              </span>
+              <button
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-1 rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white text-sm hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                下一页
+              </button>
+              <button
+                @click="currentPage = totalPages"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-1 rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white text-sm hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                末页
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <BaseModal v-model="showModal" :title="modalTitle">
       <div class="space-y-4">
         <div>
-          <label class="label">产品名称</label>
-          <input type="text" v-model="currentProduct.name" class="input" placeholder="请输入产品名称" />
+          <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">产品名称</label>
+          <input type="text" v-model="currentProduct.name" class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" placeholder="请输入产品名称" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="label">分类</label>
-            <select v-model="currentProduct.category" class="input">
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">分类</label>
+            <select v-model="currentProduct.type" class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
           <div>
-            <label class="label">价格</label>
-            <input type="text" v-model="currentProduct.price" class="input" placeholder="¥0.00" />
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">折扣价</label>
+            <input type="number" v-model="currentProduct.discountedPrice" class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" placeholder="0.00" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="label">库存</label>
-            <input type="number" v-model="currentProduct.stock" class="input" placeholder="0" />
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">原价</label>
+            <input type="number" v-model="currentProduct.originalPrice" class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" placeholder="0.00" />
           </div>
           <div>
-            <label class="label">状态</label>
-            <select v-model="currentProduct.status" class="input">
-              <option value="active">在售</option>
-              <option value="inactive">下架</option>
-            </select>
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">店铺</label>
+            <input type="text" v-model="currentProduct.shop" class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" placeholder="请输入店铺名称" />
           </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">缩略图URL</label>
+          <input type="text" v-model="currentProduct.thumbnail" class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all" placeholder="请输入图片URL" />
         </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <BaseButton variant="secondary" @click="showModal = false">取消</BaseButton>
-          <BaseButton variant="primary" @click="handleSaveProduct">保存</BaseButton>
+          <button
+            @click="showModal = false"
+            class="px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white text-sm hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
+          >
+            取消
+          </button>
+          <button
+            @click="handleSaveProduct"
+            class="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm hover:bg-primary-600 transition-all"
+          >
+            保存
+          </button>
         </div>
       </template>
     </BaseModal>
@@ -160,64 +257,106 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import BaseCard from '../components/UI/BaseCard.vue'
 import BaseButton from '../components/UI/BaseButton.vue'
-import BaseTag from '../components/UI/BaseTag.vue'
 import BaseModal from '../components/UI/BaseModal.vue'
+import goodsData from '../data/goods.js'
 
 const searchQuery = ref('')
 const categoryFilter = ref('')
-const statusFilter = ref('')
+const priceRange = ref({ min: null, max: null })
 const currentPage = ref(1)
 const pageSize = ref(10)
-const total = ref(5)
 const showModal = ref(false)
 const modalMode = ref('add')
+const loading = ref(false)
 
-const categories = ['电子产品', '家居用品', '服装', '食品', '美妆']
+// 处理商品数据，添加ID
+const products = ref([])
+const categories = ref([])
 
-const products = ref([
-  { id: 1, name: '产品1', category: '电子产品', price: '¥999', stock: 100, status: 'active', createTime: '2023-01-01 12:00:00' },
-  { id: 2, name: '产品2', category: '家居用品', price: '¥199', stock: 50, status: 'active', createTime: '2023-01-02 10:30:00' },
-  { id: 3, name: '产品3', category: '服装', price: '¥299', stock: 200, status: 'inactive', createTime: '2023-01-03 09:15:00' },
-  { id: 4, name: '产品4', category: '食品', price: '¥49', stock: 300, status: 'active', createTime: '2023-01-04 14:45:00' },
-  { id: 5, name: '产品5', category: '美妆', price: '¥149', stock: 150, status: 'active', createTime: '2023-01-05 16:20:00' }
-])
+onMounted(() => {
+  loadProducts()
+})
+
+const loadProducts = () => {
+  loading.value = true
+  // 模拟异步加载
+  setTimeout(() => {
+    // 初始化商品数据，添加ID
+    products.value = goodsData.map((item, index) => ({
+      id: index + 1,
+      ...item
+    }))
+
+    // 提取所有商品类型
+    const types = [...new Set(goodsData.map(item => item.type))]
+    categories.value = types
+
+    loading.value = false
+  }, 500)
+}
 
 const currentProduct = ref({
   id: null,
   name: '',
-  category: '电子产品',
-  price: '',
-  stock: 0,
-  status: 'active'
+  type: '',
+  discountedPrice: 0,
+  originalPrice: 0,
+  shop: '',
+  thumbnail: ''
 })
 
-const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / pageSize.value))
 
 const filteredProducts = computed(() => {
   return products.value.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const matchesCategory = !categoryFilter.value || product.category === categoryFilter.value
-    const matchesStatus = !statusFilter.value || product.status === statusFilter.value
-    return matchesSearch && matchesCategory && matchesStatus
+    const matchesCategory = !categoryFilter.value || product.type === categoryFilter.value
+
+    // 价格区间筛选
+    let matchesPrice = true
+    const price = product.discountedPrice || product.originalPrice
+    if (priceRange.value.min !== null && priceRange.value.min !== '') {
+      matchesPrice = matchesPrice && price >= parseFloat(priceRange.value.min)
+    }
+    if (priceRange.value.max !== null && priceRange.value.max !== '') {
+      matchesPrice = matchesPrice && price <= parseFloat(priceRange.value.max)
+    }
+
+    return matchesSearch && matchesCategory && matchesPrice
   })
+})
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredProducts.value.slice(start, end)
 })
 
 const modalTitle = computed(() => {
   return modalMode.value === 'add' ? '添加产品' : '编辑产品'
 })
 
+const handleSearch = () => {
+  currentPage.value = 1
+}
+
+const handlePageSizeChange = () => {
+  currentPage.value = 1
+}
+
 const handleAddProduct = () => {
   modalMode.value = 'add'
   currentProduct.value = {
     id: null,
     name: '',
-    category: '电子产品',
-    price: '',
-    stock: 0,
-    status: 'active'
+    type: categories.value[0] || '',
+    discountedPrice: 0,
+    originalPrice: 0,
+    shop: '',
+    thumbnail: ''
   }
   showModal.value = true
 }
@@ -244,7 +383,7 @@ const handleDeleteProduct = (product) => {
 const handleSaveProduct = () => {
   if (modalMode.value === 'add') {
     currentProduct.value.id = products.value.length + 1
-    products.value.push({ ...currentProduct.value, createTime: new Date().toLocaleString() })
+    products.value.push({ ...currentProduct.value })
   } else {
     const index = products.value.findIndex(p => p.id === currentProduct.value.id)
     if (index > -1) {

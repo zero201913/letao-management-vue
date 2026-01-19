@@ -35,6 +35,26 @@
       </div>
     </div>
 
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <BaseCard title="销售趋势">
+        <div class="h-64">
+          <BaseLineChart
+            :x-axis-data="salesTrendData.months"
+            :series-data="salesTrendData.revenue"
+            series-name="销售额"
+            color="#3b82f6"
+            chart-type="line"
+          />
+        </div>
+      </BaseCard>
+
+      <BaseCard title="产品分类分布">
+        <div class="h-64">
+          <BasePieChart :data="productCategoryData" />
+        </div>
+      </BaseCard>
+    </div>
+
     <BaseCard title="最近订单" :padding="false" :has-table="true">
       <template #header-action>
         <BaseButton variant="primary" size="sm">
@@ -146,7 +166,9 @@ import BaseCard from '../components/UI/BaseCard.vue'
 import BaseButton from '../components/UI/BaseButton.vue'
 import BaseTag from '../components/UI/BaseTag.vue'
 import BaseProgress from '../components/UI/BaseProgress.vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import BaseLineChart from '../components/UI/BaseLineChart.vue'
+import BasePieChart from '../components/UI/BasePieChart.vue'
+import { salesTrendData, productCategoryData } from '../data/statistics'
 import {
   faEye,
   faUsers,

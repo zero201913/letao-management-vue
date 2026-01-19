@@ -7,6 +7,14 @@
       >
         <FontAwesomeIcon icon="bars" class="text-xl" />
       </button>
+      <button
+        class="hidden lg:flex p-2 rounded-lg text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-700 transition-all duration-300"
+        @click="$emit('toggle-sidebar')"
+        :class="isSidebarCollapsed ? 'rotate-180' : ''"
+        title="切换侧边栏"
+      >
+        <FontAwesomeIcon icon="chevron-left" class="text-xl" />
+      </button>
       <h1 class="text-xl font-semibold text-surface-800 dark:text-white hidden sm:block">{{ pageTitle }}</h1>
     </div>
 
@@ -77,8 +85,8 @@
             张
           </div>
           <div class="hidden sm:block text-left">
-            <p class="text-sm font-medium text-surface-800 dark:text-white">张经理</p>
-            <p class="text-xs text-surface-500">管理员</p>
+            <p class="text-sm font-medium text-surface-800 dark:text-white">{{ userInfo.nickname }}</p>
+            <p class="text-xs text-surface-500">{{ userInfo.role === 'admin' ? '管理员' : userInfo.role === 'merchant' ? '商家' : '用户' }}</p>
           </div>
           <FontAwesomeIcon icon="chevron-down" class="text-xs text-surface-400 hidden sm:block" />
         </div>
@@ -89,8 +97,8 @@
             class="absolute right-0 mt-2 w-56 bg-white dark:bg-surface-800 rounded-xl shadow-dropdown py-2"
           >
             <div class="px-4 py-2 border-b border-surface-200 dark:border-surface-700">
-              <p class="font-medium text-surface-800 dark:text-white">张经理</p>
-              <p class="text-sm text-surface-500">admin@example.com</p>
+              <p class="font-medium text-surface-800 dark:text-white">{{ userInfo.nickname }}</p>
+              <p class="text-sm text-surface-500">{{ userInfo.email }}</p>
             </div>
             <div class="py-1">
               <div class="dropdown-item">
@@ -103,7 +111,7 @@
               </div>
             </div>
             <div class="border-t border-surface-200 dark:border-surface-700 py-1">
-              <div class="dropdown-item text-danger-500">
+              <div class="dropdown-item text-danger-500" @click="handleLogout">
                 <FontAwesomeIcon icon="sign-out-alt" />
                 <span>退出登录</span>
               </div>
@@ -117,23 +125,48 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps({
   isDarkMode: {
     type: Boolean,
     default: false
+  },
+  isSidebarCollapsed: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['toggle-theme', 'mobile-menu-toggle'])
+const emit = defineEmits(['toggle-theme', 'mobile-menu-toggle', 'toggle-sidebar'])
 
 const route = useRoute()
+const router = useRouter()
 
 const showNotifications = ref(false)
 const showUserMenu = ref(false)
 const notificationRef = ref(null)
 const userRef = ref(null)
+
+// 用户信息
+const userInfo = ref({
+  nickname: localStorage.getItem('nickname') || '张经理',
+  email: localStorage.getItem('email') || 'admin@example.com',
+  role: localStorage.getItem('userRole') || 'admin'
+})
+
+// 退出登录
+const handleLogout = () => {
+  // 清除本地存储
+  localStorage.removeItem('userRole')
+  localStorage.removeItem('userId')
+  localStorage.removeItem('username')
+  localStorage.removeItem('nickname')
+  localStorage.removeItem('email')
+
+  // 跳转到登录页
+  router.push('/')
+}
 
 const pageTitle = computed(() => {
   const titles = {

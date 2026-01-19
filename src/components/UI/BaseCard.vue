@@ -47,7 +47,7 @@ const props = defineProps({
 
 const cardClasses = computed(() => {
   const classes = [
-    'bg-white dark:bg-surface-800 rounded-card shadow-card px-6 py-5',
+    'rounded-card shadow-card px-6 py-5',
     'transition-all duration-300'
   ]
 

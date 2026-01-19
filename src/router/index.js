@@ -5,7 +5,9 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/dashboard'
+      name: 'introduction',
+      component: () => import('../views/IntroductionView.vue'),
+      meta: { title: '介绍页' }
     },
     {
       path: '/dashboard',
@@ -35,7 +37,19 @@ const router = createRouter({
       path: '/products',
       name: 'products',
       component: () => import('../views/ProductManagementView.vue'),
-      meta: { title: '产品管理', roles: ['merchant'] }
+      meta: { title: '产品管理', roles: ['admin', 'merchant'] }
+    },
+    {
+      path: '/after-sales',
+      name: 'after-sales',
+      component: () => import('../views/AfterSalesView.vue'),
+      meta: { title: '售后管理', roles: ['admin', 'merchant'] }
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: () => import('../views/CategoryManagementView.vue'),
+      meta: { title: '分类管理', roles: ['admin', 'merchant'] }
     },
     {
       path: '/settings',
@@ -49,15 +63,34 @@ const router = createRouter({
       component: () => import('../views/PermissionManagementView.vue'),
       meta: { title: '权限管理', roles: ['admin'] }
     },
+    {
+      path: '/system/logs',
+      name: 'logs',
+      component: () => import('../views/system/LogsView.vue'),
+      meta: { title: '操作日志', roles: ['admin'] }
+    },
+    {
+      path: '/system/user-info',
+      name: 'user-info',
+      component: () => import('../views/system/UserInfoView.vue'),
+      meta: { title: '用户信息', roles: ['admin'] }
+    },
+    {
+      path: '/system/merchant-info',
+      name: 'merchant-info',
+      component: () => import('../views/system/MerchantInfoView.vue'),
+      meta: { title: '商家信息', roles: ['admin'] }
+    },
 
   ],
 })
 
 router.beforeEach((to, from, next) => {
   const userRole = localStorage.getItem('userRole') || 'admin'
-  
+
   if (to.meta.roles && !to.meta.roles.includes(userRole)) {
-    next({ path: '/dashboard' })
+    // 如果用户没有权限访问当前页面，重定向到不需要权限的登录页面
+    next({ path: '/' })
   } else {
     next()
   }

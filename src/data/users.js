@@ -1,26 +1,72 @@
-// 用户管理模拟数据
-
-export const users = [
-  { id: 1, username: '李明', email: 'liming@example.com', role: '管理员', status: 'active', statusText: '活跃', registerTime: '2023-01-15', avatar: '李' },
-  { id: 2, username: '王芳', email: 'wangfang@example.com', role: '用户', status: 'active', statusText: '活跃', registerTime: '2023-02-20', avatar: '王' },
-  { id: 3, username: '张伟', email: 'zhangwei@example.com', role: '用户', status: 'pending', statusText: '待审核', registerTime: '2023-03-10', avatar: '张' },
-  { id: 4, username: '刘洋', email: 'liuyang@example.com', role: '用户', status: 'inactive', statusText: '禁用', registerTime: '2023-04-05', avatar: '刘' },
-  { id: 5, username: '陈静', email: 'chenjing@example.com', role: '管理员', status: 'active', statusText: '活跃', registerTime: '2023-05-12', avatar: '陈' },
-  { id: 6, username: '赵强', email: 'zhaoqiang@example.com', role: '编辑', status: 'active', statusText: '活跃', registerTime: '2023-06-18', avatar: '赵' },
-  { id: 7, username: '孙丽', email: 'sunli@example.com', role: '用户', status: 'active', statusText: '活跃', registerTime: '2023-07-22', avatar: '孙' },
-  { id: 8, username: '周杰', email: 'zhoujie@example.com', role: '用户', status: 'inactive', statusText: '禁用', registerTime: '2023-08-05', avatar: '周' }
+const users = [
+  {
+    "user_id": 10001,
+    "username": "admin",
+    "password": "$2a$10$7Z7eG4z8H9fK2dL1sA3dF5gH6jK7lM8nO9pQ0rS1tU2vW3xY4z",
+    "nickname": "张三不吃辣",
+    "avatar_url": "https://example.com/avatars/zhang_san_01.jpg",
+    "phone_number": "13800138000",
+    "email": "admin@example.com",
+    "gender": 1,
+    "user_type": 3,
+    "status": 1,
+    "is_deleted": 0,
+    "detail_address": "北京市朝阳区建国路88号SOHO现代城1号楼2301室",
+    "last_login_time": "2026-01-16 20:30:45",
+    "created_at": "2026-01-01 09:15:30",
+    "updated_at": "2026-01-16 20:30:45"
+  },
+  {
+    "user_id": 10002,
+    "username": "li_si_02",
+    "password": "$2a$10$9X8w7v6u5t4s3d2f1g0h9j8k7lM8nO9pQ0rS1tU2vW3xY4z",
+    "nickname": "李四爱健身",
+    "avatar_url": "https://example.com/avatars/li_si_02.jpg",
+    "phone_number": "13900139000",
+    "email": "li_si_02@example.com",
+    "gender": 1,
+    "user_type": 2,
+    "status": 1,
+    "is_deleted": 0,
+    "detail_address": "上海市浦东新区陆家嘴环路1000号上海中心大厦5002室",
+    "last_login_time": "2026-01-16 18:20:10",
+    "created_at": "2026-01-02 10:20:40",
+    "updated_at": "2026-01-16 18:20:10"
+  },
+  {
+    "user_id": 10003,
+    "username": "wang_wu_03",
+    "password": "$2a$10$1q2w3e4r5t6y7u8i9o0p1q2w3e4r5t6y7u8i9o0p1q2w3e",
+    "nickname": "王五小厨娘",
+    "avatar_url": "https://example.com/avatars/wang_wu_03.jpg",
+    "phone_number": "13700137000",
+    "email": "wang_wu_03@example.com",
+    "gender": 2,
+    "user_type": 1,
+    "status": 2,
+    "is_deleted": 0,
+    "detail_address": "广东省深圳市南山区科技园南区科苑路100号腾讯大厦3005室",
+    "last_login_time": "2026-01-10 15:10:30",
+    "created_at": "2026-01-03 14:30:20",
+    "updated_at": "2026-01-10 15:10:30"
+  },
+  {
+    "user_id": 10004,
+    "username": "zhao_liu_04",
+    "password": "$2a$10$5y6u7i8o9p0q1w2e3r4t5y6u7i8o9p0q1w2e3r4t5y6u7i",
+    "nickname": "赵六是管理员",
+    "avatar_url": "https://example.com/avatars/zhao_liu_04.jpg",
+    "phone_number": "13600136000",
+    "email": "zhao_liu_04@example.com",
+    "gender": 0,
+    "user_type": 3,
+    "status": 1,
+    "is_deleted": 0,
+    "detail_address": "浙江省杭州市西湖区文三路90号东部软件园创新大厦2008室",
+    "last_login_time": "2026-01-17 09:05:25",
+    "created_at": "2026-01-01 08:00:00",
+    "updated_at": "2026-01-17 09:05:25"
+  }
 ]
 
-// 用户角色选项
-export const userRoles = [
-  { value: 'admin', label: '管理员' },
-  { value: 'editor', label: '编辑' },
-  { value: 'user', label: '用户' }
-]
-
-// 用户状态选项
-export const userStatuses = [
-  { value: 'active', label: '活跃' },
-  { value: 'pending', label: '待审核' },
-  { value: 'inactive', label: '禁用' }
-]
+export default users

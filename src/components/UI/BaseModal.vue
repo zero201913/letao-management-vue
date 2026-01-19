@@ -21,7 +21,7 @@
           <div :class="['p-6', bodyClass]">
             <slot></slot>
           </div>
-          <div v-if="$slots.footer" class="p-6 pt-0 border-t border-surface-200 dark:border-surface-700">
+          <div v-if="$slots.footer" class="p-6 pt-0 border-surface-200 dark:border-surface-700">
             <slot name="footer"></slot>
           </div>
         </div>

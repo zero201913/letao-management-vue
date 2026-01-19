@@ -26,6 +26,7 @@ import {
   faSun,
   faMoon,
   faUser,
+  faUserSlash,
   faSignOutAlt,
   faEllipsisV,
   faSpinner,
@@ -40,7 +41,10 @@ import {
   faVideo,
   faLifeRing,
   faTachometerAlt,
-  faKey
+  faKey,
+  faPercentage,
+  faSort,
+  faFileAlt
 } from '@fortawesome/free-solid-svg-icons'
 
 // 添加项目实际使用的图标到库中
@@ -69,6 +73,7 @@ library.add(
   faSun,
   faMoon,
   faUser,
+  faUserSlash,
   faSignOutAlt,
   faEllipsisV,
   faSpinner,
@@ -83,7 +88,10 @@ library.add(
   faVideo,
   faLifeRing,
   faTachometerAlt,
-  faKey
+  faKey,
+  faPercentage,
+  faSort,
+  faFileAlt
 )
 
 export { FontAwesomeIcon }
