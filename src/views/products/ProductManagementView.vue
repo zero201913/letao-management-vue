@@ -258,10 +258,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import BaseCard from '../components/UI/BaseCard.vue'
-import BaseButton from '../components/UI/BaseButton.vue'
-import BaseModal from '../components/UI/BaseModal.vue'
-import goodsData from '../data/goods.js'
+import BaseButton from '../../components/UI/BaseButton.vue'
+import BaseModal from '../../components/UI/BaseModal.vue'
+import goodsData from '../../data/goods.js'
 
 const searchQuery = ref('')
 const categoryFilter = ref('')

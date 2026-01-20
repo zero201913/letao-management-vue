@@ -157,28 +157,41 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import BaseCard from '../components/UI/BaseCard.vue'
-import BaseButton from '../components/UI/BaseButton.vue'
-import BaseTag from '../components/UI/BaseTag.vue'
-import BaseModal from '../components/UI/BaseModal.vue'
+import { ref, computed, onMounted } from 'vue'
+import BaseCard from '../../components/UI/BaseCard.vue'
+import BaseButton from '../../components/UI/BaseButton.vue'
+import BaseTag from '../../components/UI/BaseTag.vue'
+import BaseModal from '../../components/UI/BaseModal.vue'
+import usersData from '../../data/users.js'
 
 const searchQuery = ref('')
 const roleFilter = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
 const pageSize = ref(10)
-const total = ref(5)
+const total = ref(0)
 const showModal = ref(false)
 const modalMode = ref('add')
 
-const users = ref([
-  { id: 1, username: '张经理', avatar: '张', email: 'zhang@example.com', role: 'admin', status: 'active', statusText: '已激活', registerTime: '2023-01-01 12:00:00' },
-  { id: 2, username: '李商家', avatar: '李', email: 'li@example.com', role: 'merchant', status: 'active', statusText: '已激活', registerTime: '2023-01-02 10:30:00' },
-  { id: 3, username: '王用户', avatar: '王', email: 'wang@example.com', role: 'user', status: 'pending', statusText: '待审核', registerTime: '2023-01-03 09:15:00' },
-  { id: 4, username: '赵管理员', avatar: '赵', email: 'zhao@example.com', role: 'admin', status: 'active', statusText: '已激活', registerTime: '2023-01-04 14:45:00' },
-  { id: 5, username: '钱商家', avatar: '钱', email: 'qian@example.com', role: 'merchant', status: 'inactive', statusText: '已禁用', registerTime: '2023-01-05 16:20:00' }
-])
+const users = ref([])
+
+// 初始化用户数据
+onMounted(() => {
+  // 从users.js中读取数据，只过滤出user_type: 1的用户
+  users.value = usersData
+    .filter(user => user.user_type === 1)
+    .map((user, index) => ({
+      id: user.user_id,
+      username: user.nickname,
+      avatar: user.nickname.charAt(0),
+      email: user.email,
+      role: 'user', // 固定为普通用户
+      status: user.status === 1 ? 'active' : user.status === 2 ? 'pending' : 'inactive',
+      statusText: user.status === 1 ? '已激活' : user.status === 2 ? '待审核' : '已禁用',
+      registerTime: user.created_at
+    }))
+  total.value = users.value.length
+})
 
 const currentUser = ref({
   id: null,

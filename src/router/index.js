@@ -18,13 +18,13 @@ const router = createRouter({
     {
       path: '/users',
       name: 'users',
-      component: () => import('../views/UserManagementView.vue'),
+      component: () => import('../views/users/UserManagementView.vue'),
       meta: { title: '用户管理', roles: ['admin'] }
     },
     {
       path: '/orders',
       name: 'orders',
-      component: () => import('../views/OrderManagementView.vue'),
+      component: () => import('../views/orders/OrderManagementView.vue'),
       meta: { title: '订单管理', roles: ['admin', 'merchant'] }
     },
     {
@@ -36,20 +36,38 @@ const router = createRouter({
     {
       path: '/products',
       name: 'products',
-      component: () => import('../views/ProductManagementView.vue'),
+      component: () => import('../views/products/ProductManagementView.vue'),
       meta: { title: '产品管理', roles: ['admin', 'merchant'] }
     },
     {
       path: '/after-sales',
       name: 'after-sales',
-      component: () => import('../views/AfterSalesView.vue'),
+      component: () => import('../views/orders/AfterSalesView.vue'),
       meta: { title: '售后管理', roles: ['admin', 'merchant'] }
     },
     {
       path: '/categories',
       name: 'categories',
-      component: () => import('../views/CategoryManagementView.vue'),
+      component: () => import('../views/products/CategoryManagementView.vue'),
       meta: { title: '分类管理', roles: ['admin', 'merchant'] }
+    },
+    {
+      path: '/products/reviews',
+      name: 'reviews',
+      component: () => import('../views/products/ReviewManagementView.vue'),
+      meta: { title: '评价管理', roles: ['admin', 'merchant'] }
+    },
+    {
+      path: '/users/balance',
+      name: 'balance',
+      component: () => import('../views/users/BalanceManagementView.vue'),
+      meta: { title: '余额管理', roles: ['admin'] }
+    },
+    {
+      path: '/users/cart',
+      name: 'cart',
+      component: () => import('../views/users/CartManagementView.vue'),
+      meta: { title: '购物车管理', roles: ['admin'] }
     },
     {
       path: '/settings',
@@ -70,13 +88,13 @@ const router = createRouter({
       meta: { title: '操作日志', roles: ['admin'] }
     },
     {
-      path: '/system/user-info',
+      path: '/users/info',
       name: 'user-info',
       component: () => import('../views/system/UserInfoView.vue'),
       meta: { title: '用户信息', roles: ['admin'] }
     },
     {
-      path: '/system/merchant-info',
+      path: '/users/merchant',
       name: 'merchant-info',
       component: () => import('../views/system/MerchantInfoView.vue'),
       meta: { title: '商家信息', roles: ['admin'] }

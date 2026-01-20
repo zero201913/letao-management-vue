@@ -4,8 +4,8 @@
     <div class="border-b border-surface-200 dark:border-surface-800">
       <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-surface-800 dark:text-white">售后管理</h1>
-          <p class="text-surface-500 dark:text-surface-400 mt-1">管理系统售后订单信息</p>
+          <h1 class="text-2xl font-bold text-surface-800 dark:text-white">订单管理</h1>
+          <p class="text-surface-500 dark:text-surface-400 mt-1">管理系统订单信息</p>
         </div>
       </div>
     </div>
@@ -15,52 +15,51 @@
       <!-- 筛选条件 -->
       <div class="bg-white dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- 订单编号搜索 -->
+          <!-- 订单ID精确搜索 -->
           <div>
-            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">订单编号</label>
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">订单ID</label>
             <div class="relative">
               <FontAwesomeIcon icon="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-surface-400" />
               <input
                 type="text"
-                v-model="filters.orderNo"
+                v-model="filters.orderId"
                 @input="handleSearch"
-                placeholder="请输入订单编号"
+                placeholder="请输入订单ID"
                 class="w-full pl-10 pr-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
           </div>
 
-          <!-- 退款状态筛选 -->
+          <!-- 日期筛选 -->
           <div>
-            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">退款状态</label>
-            <select
-              v-model="filters.refundStatus"
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">日期</label>
+            <input
+              type="date"
+              v-model="filters.date"
               @change="handleSearch"
               class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            >
-              <option value="">全部</option>
-              <option value="0">未退款</option>
-              <option value="1">已退款</option>
-            </select>
+            />
           </div>
 
-          <!-- 订单状态筛选 -->
+          <!-- 支付金额区间筛选 -->
           <div>
-            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">订单状态</label>
-            <select
-              v-model="filters.orderStatus"
-              @change="handleSearch"
-              class="w-full px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            >
-              <option value="">全部</option>
-              <option value="1">待付款</option>
-              <option value="2">待发货</option>
-              <option value="3">待收货</option>
-              <option value="4">已完成</option>
-              <option value="5">已取消</option>
-              <option value="6">已退款</option>
-              <option value="7">退款中</option>
-            </select>
+            <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">支付金额区间</label>
+            <div class="flex gap-2">
+              <input
+                type="number"
+                v-model="filters.minAmount"
+                @input="handleSearch"
+                placeholder="最小金额"
+                class="flex-1 px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              />
+              <input
+                type="number"
+                v-model="filters.maxAmount"
+                @input="handleSearch"
+                placeholder="最大金额"
+                class="flex-1 px-4 py-2 rounded-lg border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -95,37 +94,31 @@
             </thead>
             <tbody>
               <tr
-                v-for="afterSale in paginatedAfterSales"
-                :key="afterSale.order_id"
+                v-for="order in paginatedOrders"
+                :key="order.order_id"
                 class="border-b border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-all"
               >
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ afterSale.order_id }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ afterSale.order_no }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ afterSale.shipping_no || '-' }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(afterSale.shipped_time) }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(afterSale.received_time) }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(afterSale.completed_time) }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(afterSale.cancelled_time) }}</td>
-                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ afterSale.cancel_reason || '-' }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.order_id }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.order_no }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.user_id }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.merchant_id }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.order_amount.toFixed(2) }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.payment_amount.toFixed(2) }}</td>
                 <td class="px-4 py-3">
                   <span
                     :class="[
                       'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                      afterSale.is_refunded ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      getStatusClass(order.order_status)
                     ]"
                   >
-                    {{ afterSale.is_refunded ? '已退款' : '未退款' }}
+                    {{ getStatusText(order.order_status) }}
                   </span>
                 </td>
-                <td class="px-4 py-3">
-                  <button
-                    @click="handleRefund(afterSale)"
-                    :disabled="afterSale.is_refunded || processingRefund === afterSale.order_id"
-                    class="px-3 py-1.5 rounded border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-900 text-surface-800 dark:text-white text-sm hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    {{ processingRefund === afterSale.order_id ? '处理中...' : '退款' }}
-                  </button>
-                </td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ getPaymentMethodText(order.payment_method) }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(order.paid_time) }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ order.shipping_no || '-' }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(order.created_at) }}</td>
+                <td class="px-4 py-3 text-sm text-surface-800 dark:text-white">{{ formatDate(order.updated_at) }}</td>
               </tr>
             </tbody>
           </table>
@@ -137,15 +130,15 @@
         </div>
 
         <!-- 空状态 -->
-        <div v-else-if="paginatedAfterSales.length === 0" class="py-10 flex flex-col justify-center items-center">
+        <div v-else-if="paginatedOrders.length === 0" class="py-10 flex flex-col justify-center items-center">
           <FontAwesomeIcon icon="file-alt" class="text-4xl text-surface-300 dark:text-surface-600 mb-2" />
-          <p class="text-surface-500 dark:text-surface-400">暂无售后数据</p>
+          <p class="text-surface-500 dark:text-surface-400">暂无订单数据</p>
         </div>
 
         <!-- 分页控件 -->
         <div v-else class="px-4 py-3 border-t border-surface-200 dark:border-surface-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div class="text-sm text-surface-500 dark:text-surface-400">
-            显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, filteredAfterSales.length) }} 条，共 {{ filteredAfterSales.length }} 条
+            显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, filteredOrders.length) }} 条，共 {{ filteredOrders.length }} 条
           </div>
           <div class="flex items-center gap-2">
             <select
@@ -195,45 +188,57 @@
         </div>
       </div>
     </div>
-
-    <!-- 操作提示 -->
-    <div v-if="showNotification" class="fixed top-4 right-4 bg-white dark:bg-surface-800 rounded-lg shadow-lg border border-surface-200 dark:border-surface-700 p-4 flex items-center gap-3 animate-slide-in">
-      <FontAwesomeIcon :icon="notificationType === 'success' ? 'check-circle' : 'exclamation-circle'" :class="notificationType === 'success' ? 'text-green-500' : 'text-red-500'" class="text-xl" />
-      <span class="text-surface-800 dark:text-white">{{ notificationMessage }}</span>
-      <button @click="showNotification = false" class="ml-auto text-surface-400 hover:text-surface-600 dark:hover:text-surface-300">
-        <FontAwesomeIcon icon="times" />
-      </button>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import afterSalesData from '../data/after-sales.js'
-import ordersData from '../data/orders.js'
+import orders from '../../data/orders.js'
+
+// 状态映射
+const statusMap = {
+  1: '待付款',
+  2: '待发货',
+  3: '待收货',
+  4: '已完成',
+  5: '已取消',
+  6: '退款中',
+  7: '已退款'
+}
+
+const paymentMethodMap = {
+  1: '支付宝',
+  2: '微信支付',
+  3: '银行卡',
+  4: '货到付款',
+  5: '其他'
+}
 
 // 表格列配置
 const columns = [
   { key: 'order_id', label: '订单ID' },
   { key: 'order_no', label: '订单编号' },
+  { key: 'user_id', label: '用户ID' },
+  { key: 'merchant_id', label: '商家ID' },
+  { key: 'order_amount', label: '订单金额' },
+  { key: 'payment_amount', label: '支付金额' },
+  { key: 'order_status', label: '订单状态' },
+  { key: 'payment_method', label: '支付方式' },
+  { key: 'paid_time', label: '支付时间' },
   { key: 'shipping_no', label: '物流单号' },
-  { key: 'shipped_time', label: '发货时间' },
-  { key: 'received_time', label: '收货时间' },
-  { key: 'completed_time', label: '完成时间' },
-  { key: 'cancelled_time', label: '取消时间' },
-  { key: 'cancel_reason', label: '取消原因' },
-  { key: 'is_refunded', label: '退款状态' },
-  { key: 'action', label: '操作' }
+  { key: 'created_at', label: '创建时间' },
+  { key: 'updated_at', label: '更新时间' }
 ]
 
 // 响应式数据
-const afterSales = ref([])
+const ordersData = ref([])
 const loading = ref(false)
 const filters = ref({
-  orderNo: '',
-  refundStatus: '',
-  orderStatus: ''
+  orderId: '',
+  date: '',
+  minAmount: '',
+  maxAmount: ''
 })
 const sortConfig = ref({
   key: null,
@@ -241,33 +246,36 @@ const sortConfig = ref({
 })
 const currentPage = ref(1)
 const pageSize = ref(10)
-const processingRefund = ref(null)
-const showNotification = ref(false)
-const notificationMessage = ref('')
-const notificationType = ref('success')
 
 // 计算属性
-const filteredAfterSales = computed(() => {
-  let result = [...afterSales.value]
+const filteredOrders = computed(() => {
+  let result = [...ordersData.value]
 
-  // 订单编号筛选
-  if (filters.value.orderNo) {
-    const searchTerm = filters.value.orderNo.toLowerCase()
-    result = result.filter(afterSale => afterSale.order_no.toLowerCase().includes(searchTerm))
+  // 订单ID精确搜索
+  if (filters.value.orderId) {
+    const orderId = parseInt(filters.value.orderId)
+    if (!isNaN(orderId)) {
+      result = result.filter(order => order.order_id === orderId)
+    }
   }
 
-  // 退款状态筛选
-  if (filters.value.refundStatus) {
-    result = result.filter(afterSale => afterSale.is_refunded === parseInt(filters.value.refundStatus))
-  }
-
-  // 订单状态筛选
-  if (filters.value.orderStatus) {
-    const orderStatus = parseInt(filters.value.orderStatus)
-    result = result.filter(afterSale => {
-      const order = ordersData.find(o => o.order_id === afterSale.order_id)
-      return order && order.order_status === orderStatus
+  // 日期筛选
+  if (filters.value.date) {
+    const filterDate = new Date(filters.value.date)
+    filterDate.setHours(0, 0, 0, 0)
+    const nextDay = new Date(filterDate)
+    nextDay.setDate(nextDay.getDate() + 1)
+    result = result.filter(order => {
+      const orderDate = new Date(order.created_at)
+      return orderDate >= filterDate && orderDate < nextDay
     })
+  }
+
+  // 支付金额区间筛选
+  if (filters.value.minAmount || filters.value.maxAmount) {
+    const minAmount = parseFloat(filters.value.minAmount) || 0
+    const maxAmount = parseFloat(filters.value.maxAmount) || Infinity
+    result = result.filter(order => order.payment_amount >= minAmount && order.payment_amount <= maxAmount)
   }
 
   // 排序
@@ -277,9 +285,9 @@ const filteredAfterSales = computed(() => {
       let bVal = b[sortConfig.value.key]
 
       // 处理日期排序
-      if (['shipped_time', 'received_time', 'completed_time', 'cancelled_time'].includes(sortConfig.value.key)) {
-        aVal = aVal ? new Date(aVal) : new Date(0)
-        bVal = bVal ? new Date(bVal) : new Date(0)
+      if (['paid_time', 'created_at', 'updated_at'].includes(sortConfig.value.key)) {
+        aVal = new Date(aVal)
+        bVal = new Date(bVal)
       }
 
       if (aVal < bVal) {
@@ -296,27 +304,28 @@ const filteredAfterSales = computed(() => {
 })
 
 const totalPages = computed(() => {
-  return Math.ceil(filteredAfterSales.value.length / pageSize.value)
+  return Math.ceil(filteredOrders.value.length / pageSize.value)
 })
 
-const paginatedAfterSales = computed(() => {
+const paginatedOrders = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
-  return filteredAfterSales.value.slice(start, end)
+  return filteredOrders.value.slice(start, end)
 })
 
 // 方法
-const loadAfterSales = () => {
+const loadOrders = () => {
   loading.value = true
   // 模拟异步加载
   setTimeout(() => {
-    afterSales.value = afterSalesData
+    ordersData.value = orders
     loading.value = false
   }, 500)
 }
 
 const handleSearch = () => {
   currentPage.value = 1
+  // 可以在这里添加加载状态
 }
 
 const handleSort = (key) => {
@@ -333,79 +342,45 @@ const handlePageSizeChange = () => {
 }
 
 const formatDate = (dateString) => {
-  if (!dateString) return '-'
-  const date = new Date(dateString)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  })
+  if (!dateString) return ''
+  return dateString
 }
 
-const showNotificationMessage = (message, type = 'success') => {
-  notificationMessage.value = message
-  notificationType.value = type
-  showNotification.value = true
-
-  // 3秒后自动关闭
-  setTimeout(() => {
-    showNotification.value = false
-  }, 3000)
+const getStatusText = (status) => {
+  return statusMap[status] || '未知状态'
 }
 
-const handleRefund = (afterSale) => {
-  // 设置处理中状态
-  processingRefund.value = afterSale.order_id
+const getStatusClass = (status) => {
+  const classes = {
+    1: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    2: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    3: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    4: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    5: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+    6: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    7: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+  }
+  return classes[status] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+}
 
-  // 模拟异步处理
-  setTimeout(() => {
-    // 查找要退款的售后记录
-    const index = afterSales.value.findIndex(item => item.order_id === afterSale.order_id)
-    if (index !== -1) {
-      // 更新退款状态
-      afterSales.value[index].is_refunded = 1
-      // 设置取消时间为当前时间
-      afterSales.value[index].cancelled_time = new Date().toISOString()
-      // 设置取消原因
-      if (!afterSales.value[index].cancel_reason) {
-        afterSales.value[index].cancel_reason = '用户申请退款'
-      }
-
-      // 显示成功提示
-      showNotificationMessage('退款操作成功完成', 'success')
-    } else {
-      // 显示错误提示
-      showNotificationMessage('退款操作失败，请重试', 'error')
-    }
-
-    // 重置处理中状态
-    processingRefund.value = null
-  }, 1000)
+const getPaymentMethodText = (method) => {
+  return paymentMethodMap[method] || '未知'
 }
 
 // 生命周期
 onMounted(() => {
-  loadAfterSales()
+  loadOrders()
 })
+
+// 监听筛选条件变化
+watch(
+  () => [filters.value.orderId, filters.value.date, filters.value.minAmount, filters.value.maxAmount],
+  () => {
+    handleSearch()
+  }
+)
 </script>
 
 <style scoped>
 /* 自定义样式 */
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out forwards;
-}
 </style>

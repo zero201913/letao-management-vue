@@ -134,7 +134,9 @@ const menuItems = [
     icon: 'fa-users',
     children: [
       { path: '/users/balance', label: '余额管理' },
-      { path: '/users/cart', label: '购物车管理' }
+      { path: '/users/cart', label: '购物车管理' },
+      { path: '/users/info', label: '用户信息' },
+      { path: '/users/merchant', label: '商家信息' }
     ]
   },
   {
@@ -153,8 +155,6 @@ const menuItems = [
     icon: 'fa-cog',
     children: [
       { path: '/system/logs', label: '操作日志' },
-      { path: '/system/user-info', label: '用户信息' },
-      { path: '/system/merchant-info', label: '商家信息' },
       { path: '/settings', label: '系统设置' },
       { path: '/permissions', label: '权限管理' }
     ]
